@@ -27,8 +27,11 @@ export class Transaction {
   @Column('decimal')
   amount: number;
 
-  @Column('text')
-  description: string;
+  @Column('text', { nullable: true })
+  description?: string;
+
+  @Column({ type: "boolean", default: 0 })
+  mailSent: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

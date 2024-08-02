@@ -8,9 +8,11 @@ import {
   DeleteDateColumn,
   PrimaryGeneratedColumn,
   BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 
 import { User } from './user.entity';
+import { RequestFieldError } from '../services/error.service';
 
 @Entity('account')
 export class Account {
@@ -42,6 +44,13 @@ export class Account {
   @BeforeInsert()
   generateAccountNumber() {
     this.accountNumber = this.generateRandomAccountNumber();
+  }
+
+  @BeforeUpdate()
+  validateAccountValue() {
+    if (this.accountValue < 0) {
+      throw new RequestFieldError("User does not have money for the transfer");
+    }
   }
 
   private generateRandomAccountNumber(): string {
