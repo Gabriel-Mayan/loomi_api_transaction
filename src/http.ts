@@ -14,10 +14,10 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
-app.use(handleErrors);
 app.use(cors(corsConfig));
-app.use(routes);
 app.use(logger);
+app.use(routes);
+app.use(handleErrors);
 
 const server = createServer(app);
 

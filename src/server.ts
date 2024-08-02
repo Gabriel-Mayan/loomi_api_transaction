@@ -1,4 +1,3 @@
-/* eslint-disable functional/no-return-void */
 import "reflect-metadata";
 import * as dotenv from 'dotenv';
 
