@@ -18,8 +18,8 @@ export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('uuid')
-  senderUserId: string;
+  @Column('uuid', { nullable: true })
+  senderUserId?: string;
 
   @Column('uuid')
   receiverUserId: string;
@@ -42,9 +42,9 @@ export class Transaction {
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt: Date;
   
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'senderUserId' })
-  senderUser: User;
+  senderUser?: User;
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'receiverUserId' })

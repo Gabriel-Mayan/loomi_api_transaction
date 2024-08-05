@@ -1,13 +1,14 @@
 import { Request } from '../interfaces/express.interface';
-import { IStartTransactionSchema } from '../interfaces/transaction.interface';
+import { IStartTransactionRequest } from '../interfaces/transaction.interface';
 
 import { UserRepository } from '../repositories/user.repository';
 import { TransactionRepository } from '../repositories/trasaction.repository';
 
 import { RequestFieldError } from '../services/error.service';
 import { transactionCompletedMailSend } from '../helpers/mail.helper';
+import { IDepositRequest } from '../interfaces/deposit.interface';
 
-export const startTransaction: Request<IStartTransactionSchema> = async (request, response) => {
+export const startTransaction: Request<IStartTransactionRequest> = async (request, response) => {
     const { user } = request;
     const { receiverUserId, amount, description } = request.body;
 
@@ -50,4 +51,30 @@ export const getUserTransactions: Request = async (request, response) => {
     const transactions = await TransactionRepository.listTransactions({ userId: user.id });
 
     return response.status(200).send({ transactions });
+};
+
+export const deposit: Request<IDepositRequest> = async (request, response) => {
+    const { receiverUserId, amount, description } = request.body;
+
+    const reciver = await UserRepository.getUserById({ id: receiverUserId });
+
+    if (!reciver) {
+        throw new RequestFieldError("Reciver does not exist...");
+    };
+
+    const transfer = await TransactionRepository.createDeposit({ receiverUserId: reciver.id, amount, description });
+
+    transactionCompletedMailSend({ 
+        to: { 
+            reciver: reciver.email,
+        },
+        details: {
+            transferId: transfer.id,
+            amount,
+            description,
+            reciverName: reciver.name,            
+        }
+    });
+
+    return response.status(200).send({ message: "Deposit sent successfully!" });
 };

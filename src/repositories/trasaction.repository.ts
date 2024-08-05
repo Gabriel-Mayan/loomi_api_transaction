@@ -65,6 +65,32 @@ export const TransactionRepository = {
         });
     },
 
+    createDeposit({ receiverUserId, amount, description }: { receiverUserId: string, amount: number, description?: string }) {
+        return repository.manager.transaction(async (tsx) => {
+            const userRepository = tsx.getRepository(User);
+            const accountRepository = tsx.getRepository(Account);
+
+            const receiverUser = await userRepository.findOneOrFail({
+                where: { id: receiverUserId },
+                relations: ['account']
+            });
+
+            receiverUser.account.accountValue += amount;
+
+            await accountRepository.save(receiverUser.account);
+
+            const transaction = new Transaction();
+
+            transaction.amount = amount;
+            transaction.description = description;
+            transaction.receiverUserId = receiverUserId;
+
+            await tsx.save(transaction);
+
+            return transaction;
+        });
+    },
+
   updateTransfer({ id, isSent }: { id: string, isSent: boolean }) {
     return repository.update({ id }, { mailSent: isSent });
   },
